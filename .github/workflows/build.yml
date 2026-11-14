@@ -35,7 +35,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Decode release keystore
-        run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > $RUNNER_TEMP/docubuds-release.jks
+        run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '[:space:]' | base64 -d > $RUNNER_TEMP/docubuds-release.jks
 
       - name: Run unit tests
         run: gradle testDebugUnitTest --stacktrace
