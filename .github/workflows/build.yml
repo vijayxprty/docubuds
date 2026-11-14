@@ -23,6 +23,9 @@ jobs:
           java-version: "17"
 
       - name: Set up Android SDK
+        # android-actions/setup-android@v3 fails on current runners:
+        # it asks sdkmanager to install the removed 'tools' package.
+        # The runner already has an SDK; just install what the build needs.
         run: |
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           [ -x "$SDKMANAGER" ] || SDKMANAGER="$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager"
@@ -31,17 +34,25 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Decode release keystore
+        run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > $RUNNER_TEMP/docubuds-release.jks
+
       - name: Run unit tests
         run: gradle testDebugUnitTest --stacktrace
 
-      - name: Build debug APK
-        run: gradle assembleDebug --stacktrace
+      - name: Build release APK
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/docubuds-release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle assembleRelease --stacktrace
 
-      - name: Upload debug APK
+      - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
-          name: docubuds-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: docubuds-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
   release:
@@ -49,14 +60,14 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Download debug APK built by the build job
+      - name: Download release APK built by the build job
         uses: actions/download-artifact@v4
         with:
-          name: docubuds-debug-apk
+          name: docubuds-release-apk
           path: apk
 
       - name: Rename APK
-        run: cp apk/app-debug.apk docubuds-v1.0.0.apk
+        run: cp apk/app-release.apk docubuds-v1.0.0.apk
 
       - name: Create GitHub Release with the APK
         uses: softprops/action-gh-release@v2
@@ -65,8 +76,9 @@ jobs:
           files: docubuds-v1.0.0.apk
           name: DocuBuds v1.0.0
           body: |
-            DocuBuds v1.0.0 — complete Android vault app.
+            DocuBuds v1.0.0 — final release build of the complete Android vault app.
             Free, fully offline, no ads. See README.md for what was tested.
             Install the APK directly on your Android phone (allow installing from this source when asked).
+            If you installed the earlier debug build, uninstall it first — the release build is signed with a different key.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
