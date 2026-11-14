@@ -271,7 +271,7 @@ fun SpacesScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
     var showAddRecord by remember { mutableStateOf(false) }
     var showAddDocument by remember { mutableStateOf(false) }
 
-    LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
             if (currentSpace != null) {
                 Row(
@@ -376,7 +376,7 @@ fun SearchScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
     val query by vm.searchQuery.collectAsState()
     val results = remember(query) { vm.searchResults(query) }
     var selectedRecord by remember { mutableStateOf<VaultRecord?>(null) }
-    LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
             OutlinedTextField(
                 value = query,
@@ -409,7 +409,7 @@ fun SearchScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
 fun TrashScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context) {
     val vault by vm.vault.collectAsState()
     val trash = vault?.trash ?: emptyList()
-    LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
             Text("Trash", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(16.dp))
             Text(
@@ -445,7 +445,7 @@ fun TrashScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context)
 @Composable
 fun MoreScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context) {
     val vault by vm.vault.collectAsState()
-    LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
             Text("More", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(16.dp))
         }
