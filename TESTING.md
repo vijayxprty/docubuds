@@ -36,6 +36,10 @@ java -cp <classes>:junit-4.13.2.jar:hamcrest-core-1.3.jar:gson-2.11.0.jar:kotlin
 
 **Android sources parse-clean:** the `android/` + `ui/` sources were also compiled standalone against `android.jar` (without the AndroidX/Compose/ML Kit/CameraX libraries, which only Gradle can resolve). Result: **0 syntax errors**; all 1,344 errors were `unresolved reference` to third-party libraries only (Compose `Text`/`Modifier`/`dp`, ML Kit `com.google…`, `kotlinx.coroutines`) — no unresolved reference to any of the app's own code. The full compile, with all dependencies resolved, is therefore left to the CI build below.
 
+### CI result — 2026-11-15
+
+CI (GitHub Actions, run 43644401840, 15 Nov 2026) passed: 30/30 unit tests and the debug APK built and was verified (package `app.docubuds` 1.0.0, signature valid, donate QR present). The v1.0.0 release was then rebuilt as a **final release build** (release-signed, `assembleRelease`) and replaced the debug APK in the same v1.0.0 release — see "Release build" below. The release key lives as a GitHub Actions secret; the keystore itself is never in the repo.
+
 ### Local Gradle blocker — root cause found (2026-11-14)
 
 `./gradlew testDebugUnitTest` and `./gradlew assembleDebug` **do not run in this VM**, and it is not a code problem. Every attempt fails within ~5 s with:
@@ -54,10 +58,10 @@ Root cause, proven with a minimal Java TCP test (a Java server on 127.0.0.1 + a 
 (Python-to-Python loopback works; Java-to-anything does not. Even a trivial `gradle hello` task on an empty project fails identically, so the project is not the cause.) The Gradle daemon protocol is TCP-on-loopback only, so there is no Gradle flag that avoids it — `--no-daemon` still forks a single-use daemon over the same socket.
 
 **Two ways to get a verified build:**
-1. **CI (already set up):** push the source and let `.github/workflows/build.yml` run `./gradlew testDebugUnitTest assembleDebug` on a free GitHub-hosted Ubuntu runner, where loopback TCP is unrestricted. This is the path the release APK will come from.
+1. **CI (already set up):** push the source and let `.github/workflows/build.yml` run `./gradlew testDebugUnitTest assembleRelease` on a free GitHub-hosted Ubuntu runner, where loopback TCP is unrestricted. This is the path the release APK comes from.
 2. **Flip the permission (user action):** in Muse settings → Permissions → Direct network protocols, switch `other_tcp` from Deny to Ask — then `./gradlew` works locally too.
 
-`assembleDebug` has therefore **not** been verified locally; the APK is unverified until CI runs.
+`assembleDebug` has therefore **not** been verified locally; the APK is built and verified by CI instead — see "CI result" below.
 
 ## Spec §12 scenario checklist
 
