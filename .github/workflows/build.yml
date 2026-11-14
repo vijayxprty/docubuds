@@ -34,8 +34,15 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Check keystore secret lengths
+        run: |
+          echo "A: $(printf '%s' "${{ secrets.KEYSTORE_B64_A }}" | wc -c) (expect 895)"
+          echo "B: $(printf '%s' "${{ secrets.KEYSTORE_B64_B }}" | wc -c) (expect 895)"
+          echo "C: $(printf '%s' "${{ secrets.KEYSTORE_B64_C }}" | wc -c) (expect 895)"
+          echo "D: $(printf '%s' "${{ secrets.KEYSTORE_B64_D }}" | wc -c) (expect 895)"
+
       - name: Decode release keystore
-        run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '[:space:]' | base64 -d > $RUNNER_TEMP/docubuds-release.jks
+        run: printf '%s%s%s%s' "${{ secrets.KEYSTORE_B64_A }}" "${{ secrets.KEYSTORE_B64_B }}" "${{ secrets.KEYSTORE_B64_C }}" "${{ secrets.KEYSTORE_B64_D }}" | tr -d '[:space:]' | base64 -d > $RUNNER_TEMP/docubuds-release.jks
 
       - name: Run unit tests
         run: gradle testDebugUnitTest --stacktrace
