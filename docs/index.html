@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocuBuds — a free, fully offline vault for your documents</title>
+<meta name="description" content="DocuBuds is a completely free, fully offline Android vault for documents, IDs, bank cards, logins and notes. No account, no cloud, no ads.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f5d3a'/%3E%3Ctext x='32' y='42' font-size='30' text-anchor='middle' fill='white' font-family='sans-serif'%3ED%3C/text%3E%3C/svg%3E">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1d2b1f; background: #f6f4ec; line-height: 1.6; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
+  header { text-align: center; padding: 64px 0 32px; }
+  .logo { width: 84px; height: 84px; border-radius: 22px; background: #2f5d3a; color: #fff; font-size: 46px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  h1 { font-size: 44px; margin: 18px 0 6px; letter-spacing: -1px; }
+  .tag { font-size: 19px; color: #4c5a4e; margin: 0 0 22px; }
+  .badges span { display: inline-block; background: #e4e9dc; border: 1px solid #cdd6c2; border-radius: 999px; padding: 4px 12px; font-size: 13px; margin: 3px; }
+  .cta { display: inline-block; margin-top: 26px; background: #2f5d3a; color: #fff; text-decoration: none; font-size: 19px; font-weight: 600; padding: 14px 30px; border-radius: 12px; }
+  .cta:hover { background: #274d31; }
+  .sub { margin-top: 12px; font-size: 14px; color: #5c6a5e; }
+  .sub a { color: #2f5d3a; }
+  section { background: #fff; border: 1px solid #e3ddcc; border-radius: 16px; padding: 28px 30px; margin-top: 22px; }
+  h2 { margin: 0 0 10px; font-size: 24px; }
+  h3 { margin: 22px 0 6px; font-size: 18px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 5px 0; }
+  code { background: #eef0e6; padding: 2px 6px; border-radius: 6px; font-size: 14px; }
+  .warn { background: #fdf3e3; border: 1px solid #ecd9a8; }
+  .warn h2 { color: #7a5b12; }
+  .steps ol { margin: 6px 0; padding-left: 22px; }
+  .steps li { margin: 8px 0; }
+  footer { text-align: center; margin-top: 34px; font-size: 15px; color: #4c5a4e; }
+  footer a { color: #2f5d3a; }
+  @media (max-width: 560px) { h1 { font-size: 34px; } section { padding: 22px 20px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">D</div>
+    <h1>DocuBuds</h1>
+    <p class="tag">A completely free, fully offline vault for your documents, IDs, bank cards, logins and notes.</p>
+    <div class="badges">
+      <span>Android only</span><span>100% offline</span><span>No account</span><span>No cloud</span><span>No ads</span><span>Free forever</span>
+    </div>
+    <br>
+    <a class="cta" href="https://github.com/vijayxprty/docubuds/releases/download/v1.0.0/docubuds-v1.0.0.apk">Download DocuBuds v1.0.0 (APK)</a>
+    <p class="sub">Free, no ads, no account. Version 1.0.0 for Android.<br>
+    Source code: <a href="https://github.com/vijayxprty/docubuds">github.com/vijayxprty/docubuds</a></p>
+  </header>
+
+  <section>
+    <h2>What is DocuBuds?</h2>
+    <p>DocuBuds keeps everything important on your own phone — and nowhere else. There is no account to create, no server, no cloud backup, no sync and no advertising. Everything you save is encrypted on your phone and unlocked only with your phone's own lock: your PIN, pattern, password, face or fingerprint.</p>
+    <p>If you lose your phone, uninstall the app or clear its data, your records are gone for good — there is no backup and no recovery. That is by design, and the app tells you so on first setup. See the warning below.</p>
+  </section>
+
+  <section>
+    <h2>Every feature in v1.0.0</h2>
+
+    <h3>Unlock — only your phone's lock</h3>
+    <ul>
+      <li>First launch asks for a display name, then your phone's own unlock opens the vault.</li>
+      <li>Uses Android's unlock prompt: your PIN, pattern or password, plus face or fingerprint if you have them set up.</li>
+      <li>The app never reads or stores your phone password. There is no separate DocuBuds password and no recovery key.</li>
+      <li>If your phone lock is removed, DocuBuds will not open until a phone lock is set again.</li>
+      <li>Locks automatically after <strong>1 minute of inactivity</strong>, including time spent outside the app.</li>
+      <li>Screenshots are allowed inside the app, but the preview in the recent-apps list is blank, so a document is never visible there.</li>
+    </ul>
+
+    <h3>Everything it holds</h3>
+    <ul>
+      <li><strong>IDs</strong> — Aadhaar, PAN, passport, driving licence, voter ID and more.</li>
+      <li><strong>Bank accounts</strong> — account numbers and IFSC as text, leading zeros preserved exactly.</li>
+      <li><strong>Payment cards</strong> — card number, expiry, PIN and CVV. Nothing is left out.</li>
+      <li><strong>Logins</strong> — service, website (kept as text only, never opened or checked online), username and password.</li>
+      <li><strong>Secure notes</strong> and custom fields.</li>
+      <li><strong>Documents</strong> of any file type — images, PDFs, files, recordings and more.</li>
+    </ul>
+
+    <h3>Organisation — named spaces</h3>
+    <ul>
+      <li>Create as many named spaces as you like, with nested folders and breadcrumbs — for example Property 1, Home documents, Shop documents, Farmhouse documents, Vehicle documents, Work and Resumes.</li>
+      <li>One space per property or vehicle: ownership papers, tax, loans, plans, agreements, upkeep and insurance together.</li>
+      <li>Work spaces per company, with payslips organised by year and month (Work &gt; Company A &gt; Payslips &gt; 2026 &gt; November), plus offer letters, contracts, appraisals and relieving letters. A separate Resumes space holds labelled resume versions.</li>
+    </ul>
+
+    <h3>Adding documents</h3>
+    <ul>
+      <li>Add a document three ways: <strong>scan with the camera</strong>, pick from the <strong>gallery</strong>, or pick a <strong>file</strong>.</li>
+      <li>On-device OCR reads the text in your scans — in <strong>English and Hindi</strong> — and if it finds an expiry date, it shows it to you to confirm before saving.</li>
+      <li>Search works <strong>inside your documents</strong> too, not just in titles and folders.</li>
+      <li>View images and PDFs inside the app, with no external viewer.</li>
+      <li>Video and audio files can be stored; in-app video/audio playback comes later.</li>
+    </ul>
+
+    <h3>Passwords stay hidden</h3>
+    <ul>
+      <li>Bank numbers and passwords are masked until you tap to reveal them — and revealing is just a tap, with no second unlock.</li>
+    </ul>
+
+    <h3>Reminders before things expire</h3>
+    <ul>
+      <li>DocuBuds reminds you before a document expires: <strong>30 days, 7 days and 1 day before</strong>.</li>
+      <li>Reminders are local only, and the notification itself carries no sensitive details.</li>
+    </ul>
+
+    <h3>Trash — a second chance</h3>
+    <ul>
+      <li>Deleted items sit in the Trash for <strong>30 days</strong> before they are gone for good.</li>
+      <li>You can empty the Trash yourself at any time.</li>
+    </ul>
+
+    <h3>Export and share — while unlocked</h3>
+    <ul>
+      <li>Export any document to local storage, or share it through Android's share menu — WhatsApp, email or any app.</li>
+      <li>Files are shared in their <strong>original quality</strong>, as a file/document — DocuBuds never compresses them. (A receiving app like WhatsApp may compress images on its own side.)</li>
+    </ul>
+
+    <h3>Donate to the developer</h3>
+    <ul>
+      <li>Completely optional. A heart button in the header, a donate row at the bottom of every screen, and a full donate section in Settings with a QR code you can scan with any UPI app.</li>
+      <li>Pay any amount you like — no amount is pre-filled. UPI ID: <code>jaynishad2010@okhdfcbank</code></li>
+      <li>Donations keep DocuBuds running and ad-free. Nothing is ever locked behind a donation.</li>
+    </ul>
+
+    <h3>Privacy and encryption</h3>
+    <ul>
+      <li>Fresh encryption keys per vault, generated on your phone. Everything is encrypted with AES-256-GCM — documents, titles, folder and space names, OCR text and indexes.</li>
+      <li>The app makes <strong>no network calls at all</strong> — no analytics, no tracking, nothing leaves your phone except what you deliberately share or pay for yourself (your UPI app, your browser).</li>
+      <li>The APK contains code only — no documents, no keys, no vault data. Sharing the APK gives someone an empty vault, not yours.</li>
+      <li>Vault content is excluded from OS cloud backup.</li>
+      <li>English interface; the app follows your phone's light/dark theme.</li>
+    </ul>
+  </section>
+
+  <section class="warn">
+    <h2>Please read this before you save anything</h2>
+    <p>DocuBuds has <strong>no backup and no recovery</strong>. If you lose your phone, uninstall the app, clear its data, or the encryption keys are lost, your saved records are <strong>gone for good</strong>. There is no way to get them back — no email reset, no support reset. Keep your important originals safe elsewhere too, and export anything you may need before changing phones.</p>
+  </section>
+
+  <section class="steps">
+    <h2>How to install</h2>
+    <ol>
+      <li>Tap <strong>Download DocuBuds v1.0.0 (APK)</strong> above on your Android phone.</li>
+      <li>When your phone asks, allow installing from this source (your browser or file manager), then tap Install.</li>
+      <li>Open DocuBuds, enter a display name, and unlock with your phone's PIN, pattern, password, face or fingerprint.</li>
+      <li>Start adding your documents. That's it — no account, no sign-up.</li>
+    </ol>
+    <p>Requires Android 8.0 or newer. The APK is signed with the project's debug key for this first release.</p>
+  </section>
+
+  <section>
+    <h2>What was tested</h2>
+    <p>30 unit tests pass, covering encryption, the 1-minute lock, reminder dates, Trash, and the exact donate payment link. The full checklist is in <a href="https://github.com/vijayxprty/docubuds/blob/main/TESTING.md">TESTING.md</a> in the source repo. Checks that need a real phone — biometric unlock, camera scan, OCR on real photos, the UPI payment screen, and sharing to WhatsApp — are listed there as untested until they are tried on a phone. DocuBuds has not had an independent security review yet; do not treat it as unhackable.</p>
+  </section>
+
+  <footer>
+    <p>Made with love ♥ by Vijay Mamta Sahani (<a href="https://www.instagram.com/momentswithvms/">@momentswithvms</a>)</p>
+    <p>DocuBuds is free and open source. Source code: <a href="https://github.com/vijayxprty/docubuds">github.com/vijayxprty/docubuds</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
