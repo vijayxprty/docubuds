@@ -33,10 +33,11 @@ class ModelsTest {
     }
 
     @Test
-    fun `suggested spaces are seeded as seven`() {
-        assertEquals(7, VaultData.SUGGESTED_SPACES.size)
-        assertTrue(VaultData.SUGGESTED_SPACES.contains("Work"))
-        assertTrue(VaultData.SUGGESTED_SPACES.contains("Resumes"))
+    fun `a new vault starts empty with no spaces`() {
+        val data = VaultData(displayName = "Vijay")
+        assertTrue(data.spaces.isEmpty())
+        assertTrue(data.records.isEmpty())
+        assertTrue(data.trash.isEmpty())
     }
 
     @Test

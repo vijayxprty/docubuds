@@ -114,7 +114,11 @@ fun AddRecordDialog(vm: VaultViewModel, spaceId: String?, onDismiss: () -> Unit)
                     error = "Expiry date must be YYYY-MM-DD."
                     return@Button
                 }
-                val targetSpace = spaceId ?: return@Button
+                if (spaceId == null) {
+                    error = "Create a folder first — tap “New folder”, then add your record to it."
+                    return@Button
+                }
+                val targetSpace = spaceId
                 vm.addRecord(
                     VaultRecord(
                         type = type,
@@ -245,7 +249,11 @@ fun AddDocumentDialog(vm: VaultViewModel, spaceId: String?, onDismiss: () -> Uni
                         error = "Expiry date must be YYYY-MM-DD."
                         return@Button
                     }
-                    val targetSpace = spaceId ?: return@Button
+                    if (spaceId == null) {
+                        error = "Create a folder first — tap “New folder”, then add your document to it."
+                        return@Button
+                    }
+                    val targetSpace = spaceId
                     val fileId = vm.saveAttachment(bytes)
                     vm.addRecord(
                         VaultRecord(

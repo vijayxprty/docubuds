@@ -2,8 +2,53 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#FFFFFF"
-        android:pathData="M54,20c-8,0-14,6-14,14v40c0,8 6,14 14,14s14,-6 14,-14V34c0,-8-6,-14-14,-14z" />
-    <path android:fillColor="#E63946"
-        android:pathData="M54,62l-8,-6c-3,-2-3,-7 0,-9 2,-2 6,-1 8,1 2,-2 6,-3 8,-1 3,2 3,7 0,9z" />
+    <!-- DocuBuds launcher icon v2: front-facing steel vault safe, round door
+         swung open showing its FACE (hub + wheel), folders and a stack of
+         documents clearly visible inside. Key elements sit inside the 66dp
+         safe zone (circle r=33 at 54,54); only the safe body frame extends
+         toward the edges. -->
+    <!-- Safe body -->
+    <path android:fillColor="#2E8B62"
+        android:pathData="M14,22 a6,6 0 0 1 6,-6 h68 a6,6 0 0 1 6,6 v64 a6,6 0 0 1 -6,6 h-68 a6,6 0 0 1 -6,-6 z" />
+    <!-- Vault interior -->
+    <path android:fillColor="#043B22"
+        android:pathData="M24,54 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0 z" />
+    <!-- Opening rim -->
+    <path android:fillColor="#00000000"
+        android:strokeColor="#FEE9B0" android:strokeWidth="4"
+        android:pathData="M24,54 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0 z" />
+    <!-- Rim bolts -->
+    <path android:fillColor="#E5CA91"
+        android:pathData="M70.2,54 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0 z M63.2,37 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0 z M46.2,30 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0 z M29.2,37 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0 z M22.2,54 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0 z M29.2,71 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0 z M46.2,78 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0 z M63.2,71 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0 z" />
+    <!-- Folder 1 (back, darker cream) with tab -->
+    <path android:fillColor="#E5CA91"
+        android:pathData="M32,37 h7 v3 h-7 z M31,40 h18 v19 h-18 z" />
+    <!-- Folder 2 (front, cream) with tab -->
+    <path android:fillColor="#FEE9B0"
+        android:pathData="M33,46 h8 v3 h-8 z M33,49 h19 v20 h-19 z" />
+    <!-- Folder 2 divider line -->
+    <path android:fillColor="#00000000"
+        android:strokeColor="#043B22" android:strokeWidth="1.5"
+        android:pathData="M35,57 h15" />
+    <!-- Stack of papers -->
+    <path android:fillColor="#FEE9B0"
+        android:pathData="M53,48 h13 v3 h-13 z M53,54 h13 v3 h-13 z M53,60 h13 v3 h-13 z M53,66 h13 v3 h-13 z" />
+    <!-- Open vault door (face) -->
+    <path android:fillColor="#FEE9B0"
+        android:strokeColor="#015E3A" android:strokeWidth="2"
+        android:pathData="M62,54 a20,20 0 1,0 40,0 a20,20 0 1,0 -40,0 z" />
+    <!-- Door inner ring -->
+    <path android:fillColor="#00000000"
+        android:strokeColor="#E5CA91" android:strokeWidth="2"
+        android:pathData="M68,54 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 z" />
+    <!-- Door wheel -->
+    <path android:fillColor="#00000000"
+        android:strokeColor="#015E3A" android:strokeWidth="2.5"
+        android:pathData="M73,54 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 z" />
+    <path android:fillColor="#00000000"
+        android:strokeColor="#015E3A" android:strokeWidth="2.5"
+        android:pathData="M82,45 v18 M73,54 h18" />
+    <!-- Wheel hub -->
+    <path android:fillColor="#015E3A"
+        android:pathData="M79.5,54 a2.5,2.5 0 1,0 5,0 a2.5,2.5 0 1,0 -5,0 z" />
 </vector>

@@ -51,11 +51,7 @@ data class VaultData(
     val notified: Set<String> = emptySet(),
     val createdAt: Long = System.currentTimeMillis()
 ) {
-    companion object {
-        /** Suggested spaces seeded on first launch. The user can delete/rename any of them. */
-        val SUGGESTED_SPACES = listOf(
-            "Property 1", "Home documents", "Shop documents", "Farmhouse documents",
-            "Vehicle documents", "Work", "Resumes"
-        )
-    }
+    // No spaces are seeded: a new vault starts genuinely empty and the
+    // user creates their own spaces. (v1.0.0 seeded 7 suggested spaces;
+    // removed in v1.0.1 — the owner asked for a true empty state.)
 }

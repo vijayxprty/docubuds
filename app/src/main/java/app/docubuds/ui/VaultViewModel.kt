@@ -94,14 +94,12 @@ class VaultViewModel(application: Application) : AndroidViewModel(application) {
     fun openSpace(spaceId: String?) { _currentSpaceId.value = spaceId; touch() }
     fun setSearchQuery(q: String) { _searchQuery.value = q }
 
-    /** First launch: save the display name and seed the suggested spaces.
+    /** First launch: save the display name only. The vault starts empty —
+     *  no spaces are created for the user; they create their own.
      *  The in-memory state is set synchronously so the unlock that follows
      *  immediately cannot race the disk write. */
     fun setup(displayName: String) {
-        val spaces = VaultData.SUGGESTED_SPACES.mapIndexed { i, name ->
-            Space(name = name, order = i)
-        }
-        val data = VaultData(displayName = displayName.trim(), spaces = spaces)
+        val data = VaultData(displayName = displayName.trim(), spaces = emptyList())
         _vault.value = data
         viewModelScope.launch(Dispatchers.IO) { store.save(data) }
     }
