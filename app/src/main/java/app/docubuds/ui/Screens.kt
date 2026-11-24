@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -129,30 +131,41 @@ fun MainScaffold(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
             )
         },
         bottomBar = {
-            NavigationBar {
+            // Fixed 80dp bar (Material 3 default) with 24dp icons and
+            // single-line 12sp labels, so icons never touch the top edge
+            // and labels are never clipped. Scaffold's content padding
+            // (applied below) keeps screen content above this bar.
+            NavigationBar(
+                modifier = Modifier.height(80.dp),
+                tonalElevation = 3.dp
+            ) {
                 NavigationBarItem(
                     selected = screen == AppScreen.SPACES,
                     onClick = { vm.goTo(AppScreen.SPACES); vm.openSpace(null) },
-                    icon = { Icon(Icons.Filled.Folder, contentDescription = null) },
-                    label = { Text("Spaces") }
+                    icon = { Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(24.dp)) },
+                    label = { Text("Spaces", fontSize = 12.sp, maxLines = 1) },
+                    alwaysShowLabel = true
                 )
                 NavigationBarItem(
                     selected = screen == AppScreen.SEARCH,
                     onClick = { vm.goTo(AppScreen.SEARCH) },
-                    icon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                    label = { Text("Search") }
+                    icon = { Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(24.dp)) },
+                    label = { Text("Search", fontSize = 12.sp, maxLines = 1) },
+                    alwaysShowLabel = true
                 )
                 NavigationBarItem(
                     selected = screen == AppScreen.TRASH,
                     onClick = { vm.goTo(AppScreen.TRASH) },
-                    icon = { Icon(Icons.Filled.Delete, contentDescription = null) },
-                    label = { Text("Trash") }
+                    icon = { Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(24.dp)) },
+                    label = { Text("Trash", fontSize = 12.sp, maxLines = 1) },
+                    alwaysShowLabel = true
                 )
                 NavigationBarItem(
                     selected = screen == AppScreen.MORE,
                     onClick = { vm.goTo(AppScreen.MORE) },
-                    icon = { Icon(Icons.Filled.MoreHoriz, contentDescription = null) },
-                    label = { Text("More") }
+                    icon = { Icon(Icons.Filled.MoreHoriz, contentDescription = null, modifier = Modifier.size(24.dp)) },
+                    label = { Text("More", fontSize = 12.sp, maxLines = 1) },
+                    alwaysShowLabel = true
                 )
             }
         },
@@ -271,7 +284,7 @@ fun SpacesScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
     var showAddRecord by remember { mutableStateOf(false) }
     var showAddDocument by remember { mutableStateOf(false) }
 
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             if (currentSpace != null) {
                 Row(
@@ -376,7 +389,7 @@ fun SearchScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
     val query by vm.searchQuery.collectAsState()
     val results = remember(query) { vm.searchResults(query) }
     var selectedRecord by remember { mutableStateOf<VaultRecord?>(null) }
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             OutlinedTextField(
                 value = query,
@@ -409,7 +422,7 @@ fun SearchScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
 fun TrashScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context) {
     val vault by vm.vault.collectAsState()
     val trash = vault?.trash ?: emptyList()
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text("Trash", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(16.dp))
             Text(
@@ -445,7 +458,7 @@ fun TrashScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context)
 @Composable
 fun MoreScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context) {
     val vault by vm.vault.collectAsState()
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text("More", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(16.dp))
         }
@@ -454,7 +467,7 @@ fun MoreScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context) 
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("About DocuBuds", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version 1.0.0 · Android only")
+                    Text("Version 1.0.1 · Android only")
                     Text("Signed in as: ${vault?.displayName ?: ""} (display name only, not an account)")
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Fully offline. No account, no cloud, no backup, no recovery key. Free, with no ads. Your vault is unlocked only by your phone's lock, and locks again after 1 minute of inactivity.")
