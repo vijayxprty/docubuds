@@ -1,6 +1,6 @@
 # DocuBuds
 
-A complete, free, fully offline Android vault for documents, IDs, bank accounts and cards, logins and secure notes. Android only, version 1.0.0.
+A complete, free, fully offline Android vault for documents, IDs, bank accounts and cards, logins and secure notes. Android only, version 1.0.1.
 
 **Package:** `app.docubuds` · **minSdk 26, targetSdk 34** · **Kotlin + Jetpack Compose (Material 3)**
 
@@ -35,7 +35,7 @@ A complete, free, fully offline Android vault for documents, IDs, bank accounts 
 ./gradlew assembleDebug        # debug APK at app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Requires JDK 17 and the Android SDK (compileSdk 34). CI (`.github/workflows/build.yml`) runs the unit tests and builds the release APK on a free GitHub-hosted Ubuntu runner, uploads it as a workflow artifact, and publishes it as the v1.0.0 GitHub Release on pushes to main. The release APK is signed with the project's release key, which lives as a GitHub Actions secret — the keystore itself is never in the repo.
+Requires JDK 17 and the Android SDK (compileSdk 34). CI (`.github/workflows/build.yml`) runs the unit tests and builds the release APK on a free GitHub-hosted Ubuntu runner, uploads it as a workflow artifact, and publishes it as the v1.0.1 GitHub Release on pushes to main. The release APK is signed with the project's release key, which lives as a GitHub Actions secret — the keystore itself is never in the repo.
 
 ## Architecture (one page)
 
@@ -59,7 +59,7 @@ Tested (see `TESTING.md` for the full checklist with evidence):
 
 - **Unit tests: 30 / 30 pass** — crypto round-trip, wrong-key and tamper failure, fresh IVs, vault JSON round-trip (leading zeros preserved), lock timing (59s open / 60s locked), reminder dates (30/7/1), trash purge (29 days kept / 31 days purged), donate UPI link exactness (no amount), expiry-date parsing. Run via the standalone Kotlin compiler + JUnit (see TESTING.md for the exact commands and why `./gradlew` is blocked in this VM).
 - **Android sources parse-clean** with 0 syntax errors (standalone kotlinc check against `android.jar`; only missing-library references remain, which Gradle resolves on CI).
-- The final APK is built by CI as a release build (see `TESTING.md`): 30/30 unit tests pass there, and the release APK is signed with the project's release key. The first CI-built debug APK was replaced by the release build in v1.0.0. Local `./gradlew` is blocked in this VM: this VM's sandbox blocks the Gradle daemon's loopback TCP (`other_tcp` permission = Deny — see TESTING.md).
+- The final APK is built by CI as a release build (see `TESTING.md`): 30/30 unit tests pass there, and the release APK is signed with the project's release key. The first CI-built debug APK was replaced by the release build in v1.0.0; v1.0.1 is release-signed with the same permanent key. Local `./gradlew` is blocked in this VM: this VM's sandbox blocks the Gradle daemon's loopback TCP (`other_tcp` permission = Deny — see TESTING.md).
 
 NOT tested — labelled honestly, do not claim as verified:
 
