@@ -3,6 +3,7 @@ package app.docubuds.ui
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,37 +11,53 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,11 +66,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.docubuds.core.RecordType
@@ -65,7 +81,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-/** Sensitive fields are masked until tapped to reveal (tap reveals, no second unlock). */
 val SENSITIVE_KEYS = setOf("password", "pin", "cvv", "account number", "card number", "number")
 
 fun formatEpochDay(epochDay: Long?): String =
@@ -93,7 +108,7 @@ fun DocuBudsRoot(
             modifier = Modifier.fillMaxSize().padding(24.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
-        ) { Text("Loading DocuBuds…") }
+        ) { Text("Opening DocuBuds…", fontSize = 16.sp, fontWeight = FontWeight.Medium) }
         vault == null -> SetupScreen(onSetup = { name ->
             vm.setup(name)
             authenticate({ vm.unlock() }, {})
@@ -111,18 +126,54 @@ fun DocuBudsRoot(
 @Composable
 fun MainScaffold(vm: VaultViewModel, donate: (Context) -> Unit, context: Context) {
     val screen by vm.screen.collectAsState()
-    var showAddMenu by remember { mutableStateOf(false) }
+    var showSheet by remember { mutableStateOf(false) }
     var showAddRecord by remember { mutableStateOf(false) }
     var showAddDocument by remember { mutableStateOf(false) }
+    var showAddSpace by remember { mutableStateOf(false) }
     val vaultForAdd by vm.vault.collectAsState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("DocuBuds") },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("DocuBuds", fontWeight = FontWeight.Bold)
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier.padding(top = 2.dp)
+                        ) {
+                            Text(
+                                "OFFLINE",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                },
                 actions = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.Lock, contentDescription = null)
-                        Text("On your device", fontSize = 13.sp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.padding(end = 4.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(Icons.Filled.Lock, contentDescription = null, modifier = Modifier.size(12.dp))
+                                Text("1m lock", fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                            }
+                        }
                         DonateHeartButton(onDonate = { donate(context) })
                     }
                 }
@@ -133,8 +184,8 @@ fun MainScaffold(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
                 NavigationBarItem(
                     selected = screen == AppScreen.SPACES,
                     onClick = { vm.goTo(AppScreen.SPACES); vm.openSpace(null) },
-                    icon = { Icon(Icons.Filled.Folder, contentDescription = null) },
-                    label = { Text("Spaces") }
+                    icon = { Icon(Icons.Filled.Shield, contentDescription = null) },
+                    label = { Text("Vault") }
                 )
                 NavigationBarItem(
                     selected = screen == AppScreen.SEARCH,
@@ -152,14 +203,19 @@ fun MainScaffold(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
                     selected = screen == AppScreen.MORE,
                     onClick = { vm.goTo(AppScreen.MORE) },
                     icon = { Icon(Icons.Filled.MoreHoriz, contentDescription = null) },
-                    label = { Text("More") }
+                    label = { Text("Security") }
                 )
             }
         },
         floatingActionButton = {
             if (screen == AppScreen.SPACES) {
-                FloatingActionButton(onClick = { showAddMenu = true }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                FloatingActionButton(
+                    onClick = { showSheet = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add Item", modifier = Modifier.size(24.dp))
                 }
             }
         }
@@ -170,20 +226,88 @@ fun MainScaffold(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
                 .padding(padding)
         ) {
             when (screen) {
-                AppScreen.SPACES -> SpacesScreen(vm, donate, context)
+                AppScreen.SPACES -> SpacesScreen(
+                    vm = vm,
+                    donate = donate,
+                    context = context,
+                    onOpenAddSheet = { showSheet = true }
+                )
                 AppScreen.SEARCH -> SearchScreen(vm, donate, context)
                 AppScreen.TRASH -> TrashScreen(vm, donate, context)
                 AppScreen.MORE -> MoreScreen(vm, donate, context)
             }
         }
     }
-    if (showAddMenu) {
-        AddMenuDialog(
-            onAddRecord = { showAddMenu = false; showAddRecord = true },
-            onAddDocument = { showAddMenu = false; showAddDocument = true },
-            onDismiss = { showAddMenu = false }
-        )
+
+    if (showSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSheet = false },
+            sheetState = sheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 36.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    "Add to Encrypted Vault",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    "Hardware encrypted with AES-256 GCM. Never sent to any server.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    AddSheetCard(
+                        title = "Scan Document",
+                        subtitle = "Camera OCR",
+                        icon = Icons.Filled.CameraAlt,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        showSheet = false
+                        showAddDocument = true
+                    }
+                    AddSheetCard(
+                        title = "Import File",
+                        subtitle = "PDF, Image, Doc",
+                        icon = Icons.Filled.UploadFile,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        showSheet = false
+                        showAddDocument = true
+                    }
+                }
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    AddSheetCard(
+                        title = "Card or Bank",
+                        subtitle = "Masked PIN & CVV",
+                        icon = Icons.Filled.CreditCard,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        showSheet = false
+                        showAddRecord = true
+                    }
+                    AddSheetCard(
+                        title = "New Space",
+                        subtitle = "Organize folders",
+                        icon = Icons.Filled.Folder,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        showSheet = false
+                        showAddSpace = true
+                    }
+                }
+            }
+        }
     }
+
     val addSpaceId = vm.currentSpaceId.collectAsState().value
         ?: vaultForAdd?.spaces?.firstOrNull()?.id
     if (showAddRecord) {
@@ -192,6 +316,30 @@ fun MainScaffold(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
     if (showAddDocument) {
         AddDocumentDialog(vm, addSpaceId) { showAddDocument = false }
     }
+    if (showAddSpace) {
+        TextInputDialog(
+            title = "New Space",
+            label = "Space name (e.g. Identity, Vehicle, Taxes)",
+            onDismiss = { showAddSpace = false },
+            onConfirm = { vm.addSpace(it, vm.currentSpaceId.value); showAddSpace = false }
+        )
+    }
+}
+
+@Composable
+fun AddSheetCard(title: String, subtitle: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Card(
+        modifier = modifier.clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Text(subtitle, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
 }
 
 @Composable
@@ -199,67 +347,131 @@ fun SetupScreen(onSetup: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Welcome to DocuBuds", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(72.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    Icons.Filled.Shield,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text("Welcome to DocuBuds", fontSize = 26.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        Text("A private place on your phone for your documents, IDs, logins and cards. Fully offline — nothing leaves this phone except what you deliberately share.")
-        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            "Your 100% offline personal vault for documents, IDs, cards and logins. Fully encrypted on this device.",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            lineHeight = 20.sp
+        )
+        Spacer(modifier = Modifier.height(28.dp))
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Your display name") },
+            label = { Text("Display Name") },
+            placeholder = { Text("e.g. Personal Vault") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            shape = RoundedCornerShape(14.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            "Important: DocuBuds has no backup and no recovery key. Your vault is " +
-                "unlocked only by your phone's own lock (PIN, pattern, password, face or " +
-                "fingerprint). If you lose this phone, uninstall the app, clear its data, " +
-                "or lose its encryption keys, everything saved here is gone for good. " +
-                "There is no way to recover it.",
-            fontSize = 14.sp
-        )
-        error?.let { Text(it, color = androidx.compose.ui.graphics.Color.Red) }
+        Card(
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f))
+        ) {
+            Row(modifier = Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                Text(
+                    "DocuBuds has zero cloud sync or master password. Unlock is strictly tied to your phone's biometric or PIN lock. Losing this device or clearing app data erases records permanently.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    lineHeight = 16.sp
+                )
+            }
+        }
+        error?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+        }
         Spacer(modifier = Modifier.height(24.dp))
         Button(
             onClick = {
                 if (name.isBlank()) error = "Please enter a display name."
                 else onSetup(name)
             },
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Set up DocuBuds") }
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth().height(50.dp)
+        ) { Text("Initialize Empty Vault", fontWeight = FontWeight.Bold, fontSize = 15.sp) }
     }
 }
 
 @Composable
 fun LockScreen(isDeviceSecure: Boolean, onUnlock: () -> Unit, onOpenSettings: () -> Unit) {
-    var error by remember { mutableStateOf<String?>(null) }
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(Icons.Filled.Lock, contentDescription = null, modifier = Modifier.padding(16.dp))
-        Text("DocuBuds is locked", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(80.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Lock, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
+            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text("DocuBuds is Locked", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         if (!isDeviceSecure) {
-            Text("Your phone has no lock set (no PIN, pattern or password). DocuBuds can only be unlocked with your phone's lock, so it cannot open until you set one.")
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onOpenSettings) { Text("Open phone security settings") }
+            Text(
+                "Your phone has no device lock (no PIN, pattern, or biometric password). DocuBuds requires a device lock to encrypt your vault keys.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(onClick = onOpenSettings, shape = RoundedCornerShape(14.dp)) {
+                Text("Open Security Settings")
+            }
         } else {
-            Text("Unlock with your phone lock — PIN, pattern, password, face or fingerprint.")
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onUnlock) { Text("Unlock") }
-            error?.let { Text(it) }
+            Text(
+                "Unlock with your phone PIN, pattern, face or fingerprint.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = onUnlock,
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.fillMaxWidth().height(48.dp)
+            ) {
+                Text("Unlock Vault", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            }
         }
     }
 }
 
 @Composable
-fun SpacesScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context) {
+fun SpacesScreen(
+    vm: VaultViewModel,
+    donate: (Context) -> Unit,
+    context: Context,
+    onOpenAddSheet: () -> Unit
+) {
     val vault by vm.vault.collectAsState()
     val currentSpaceId by vm.currentSpaceId.collectAsState()
     val data = vault ?: return
@@ -267,105 +479,258 @@ fun SpacesScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
     val childSpaces = data.spaces.filter { it.parentId == currentSpaceId }.sortedBy { it.order }
     val records = data.records.filter { it.spaceId == currentSpaceId }
     var selectedRecord by remember { mutableStateOf<VaultRecord?>(null) }
-    var showAddSpace by remember { mutableStateOf(false) }
-    var showAddRecord by remember { mutableStateOf(false) }
-    var showAddDocument by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf<RecordType?>(null) }
+
+    val filteredRecords = if (selectedCategory == null) records else records.filter { it.type == selectedCategory }
+    val todayEpoch = remember { LocalDate.now().toEpochDay() }
+
+    // Watchtower / Expiry check (documents expiring within 30 days)
+    val expiringRecords = remember(data.records) {
+        data.records.filter {
+            val exp = it.expiryEpochDay
+            exp != null && (exp - todayEpoch) in 0..30
+        }
+    }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
             if (currentSpace != null) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { vm.openSpace(currentSpace.parentId) }) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(vm.spacePath(currentSpaceId), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 }
             } else {
-                Text(
-                    "Spaces",
-                    fontWeight = FontWeight.Bold, fontSize = 20.sp,
-                    modifier = Modifier.padding(16.dp)
-                )
-                Text(
-                    "Hello, ${data.displayName}. Your documents live only on this phone.",
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                    Text("Secure Vault", fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    Text("All documents and credentials encrypted on-device.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
+
+        // Expiry alert banner
+        if (expiringRecords.isNotEmpty() && currentSpace == null) {
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f))
+                ) {
+                    Row(modifier = Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.error, modifier = Modifier.size(32.dp)) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text("!", fontWeight = FontWeight.ExtraBold, color = Color.White)
+                            }
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            val first = expiringRecords.first()
+                            val daysLeft = (first.expiryEpochDay ?: todayEpoch) - todayEpoch
+                            Text("${first.title} Expiring", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text("Expires in $daysLeft days. Local reminder active.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Category Filter Chips
+        if (records.isNotEmpty()) {
+            item {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        FilterChip(
+                            selected = selectedCategory == null,
+                            onClick = { selectedCategory = null },
+                            label = { Text("All (${records.size})") }
+                        )
+                    }
+                    item {
+                        FilterChip(
+                            selected = selectedCategory == RecordType.DOCUMENT || selectedCategory == RecordType.ID,
+                            onClick = { selectedCategory = if (selectedCategory == RecordType.DOCUMENT) null else RecordType.DOCUMENT },
+                            label = { Text("Documents") }
+                        )
+                    }
+                    item {
+                        FilterChip(
+                            selected = selectedCategory == RecordType.CARD || selectedCategory == RecordType.BANK_ACCOUNT,
+                            onClick = { selectedCategory = if (selectedCategory == RecordType.CARD) null else RecordType.CARD },
+                            label = { Text("Cards & Banking") }
+                        )
+                    }
+                    item {
+                        FilterChip(
+                            selected = selectedCategory == RecordType.LOGIN,
+                            onClick = { selectedCategory = if (selectedCategory == RecordType.LOGIN) null else RecordType.LOGIN },
+                            label = { Text("Inert Logins") }
+                        )
+                    }
+                    item {
+                        FilterChip(
+                            selected = selectedCategory == RecordType.NOTE,
+                            onClick = { selectedCategory = if (selectedCategory == RecordType.NOTE) null else RecordType.NOTE },
+                            label = { Text("Notes") }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Child Spaces
         items(childSpaces) { space ->
-            Row(
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { vm.openSpace(space.id) }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .clickable { vm.openSpace(space.id) },
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             ) {
-                Icon(Icons.Filled.Folder, contentDescription = null)
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(space.name, fontSize = 16.sp, modifier = Modifier.weight(1f))
-                Text("${data.records.count { it.spaceId == space.id }}", fontSize = 13.sp)
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Filled.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Text(space.name, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                    Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+                        Text(
+                            "${data.records.count { it.spaceId == space.id }}",
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
             }
         }
-        items(records) { record ->
-            RecordRow(record) { selectedRecord = record }
+
+        // Records list
+        items(filteredRecords) { record ->
+            RecordCard(record) { selectedRecord = record }
         }
+
+        // TRUE EMPTY STATE: Zero spaces, zero records
         if (childSpaces.isEmpty() && records.isEmpty()) {
             item {
-                Text(
-                    "Nothing here yet. Tap + to add a space, a record, or a document.",
-                    modifier = Modifier.padding(16.dp)
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 40.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.size(88.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Shield, contentDescription = null, modifier = Modifier.size(44.dp), tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Your Vault is Empty", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        Text(
+                            "Zero pre-seeded folders, zero cloud tracking. Everything saved here is encrypted directly into your phone hardware.",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            lineHeight = 18.sp,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = onOpenAddSheet,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                    ) {
+                        Icon(Icons.Filled.CameraAlt, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Scan First Document", fontWeight = FontWeight.Bold)
+                    }
+
+                    OutlinedButton(
+                        onClick = onOpenAddSheet,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth().height(46.dp)
+                    ) {
+                        Text("Add Card, Login or Space")
+                    }
+                }
             }
         }
+
         item {
-            Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { showAddSpace = true }) { Text("New folder") }
-                OutlinedButton(onClick = { showAddRecord = true }) { Text("Add record") }
-                OutlinedButton(onClick = { showAddDocument = true }) { Text("Add document") }
-            }
+            Spacer(modifier = Modifier.height(16.dp))
+            DonateFooter(isMoreScreen = false, onDonate = { donate(context) })
+            Spacer(modifier = Modifier.height(72.dp))
         }
-        item { DonateFooter(isMoreScreen = false, onDonate = { donate(context) }) }
     }
-    if (showAddSpace) {
-        TextInputDialog(
-            title = "New folder",
-            label = "Folder name",
-            onDismiss = { showAddSpace = false },
-            onConfirm = { vm.addSpace(it, currentSpaceId); showAddSpace = false }
-        )
-    }
-    if (showAddRecord) {
-        AddRecordDialog(vm, currentSpaceId ?: data.spaces.firstOrNull()?.id) { showAddRecord = false }
-    }
-    if (showAddDocument) {
-        AddDocumentDialog(vm, currentSpaceId ?: data.spaces.firstOrNull()?.id) { showAddDocument = false }
-    }
+
     selectedRecord?.let { record ->
         RecordDetailDialog(vm, record, donate, context) { selectedRecord = null }
     }
 }
 
 @Composable
-fun RecordRow(record: VaultRecord, onClick: () -> Unit) {
-    Row(
+fun RecordCard(record: VaultRecord, onClick: () -> Unit) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Text(
-            record.type.name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() },
-            fontSize = 12.sp,
-            modifier = Modifier.width(90.dp)
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(record.title, fontWeight = FontWeight.Bold)
-            if (record.expiryEpochDay != null) {
-                Text("Expires ${formatEpochDay(record.expiryEpochDay)}", fontSize = 12.sp)
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val icon = when (record.type) {
+                RecordType.ID, RecordType.DOCUMENT -> Icons.Filled.Description
+                RecordType.CARD, RecordType.BANK_ACCOUNT -> Icons.Filled.CreditCard
+                RecordType.LOGIN -> Icons.Filled.Key
+                RecordType.NOTE -> Icons.Filled.Note
+            }
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                }
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(record.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                val typeLabel = record.type.name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() }
+                val expLabel = record.expiryEpochDay?.let { " • Exp: ${formatEpochDay(it)}" } ?: ""
+                Text("$typeLabel$expLabel", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+
+            if (record.fileName != null) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                ) {
+                    Text("FILE", fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), color = MaterialTheme.colorScheme.primary)
+                }
             }
         }
     }
@@ -381,22 +746,28 @@ fun SearchScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context
             OutlinedTextField(
                 value = query,
                 onValueChange = { vm.setSearchQuery(it) },
-                label = { Text("Search titles, fields and document text") },
+                label = { Text("Search OCR titles, fields and text") },
+                placeholder = { Text("English / हिन्दी") },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp)
             )
             Text(
-                "Search runs on this phone, in English and Hindi, inside your scanned documents too.",
-                fontSize = 13.sp,
+                "Search runs strictly on this phone with local ML Kit models.",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
         items(results) { record ->
-            RecordRow(record) { selectedRecord = record }
+            RecordCard(record) { selectedRecord = record }
         }
         if (query.isNotBlank() && results.isEmpty()) {
-            item { Text("No matches.", modifier = Modifier.padding(16.dp)) }
+            item {
+                Text("No matches found in your encrypted vault.", modifier = Modifier.padding(24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
         item { DonateFooter(isMoreScreen = false, onDonate = { donate(context) }) }
     }
@@ -411,32 +782,45 @@ fun TrashScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context)
     val trash = vault?.trash ?: emptyList()
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
-            Text("Trash", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(16.dp))
-            Text(
-                "Deleted items stay here for 30 days, then are gone for good. You can also empty the Trash now.",
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Trash", fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                Text(
+                    "Deleted items are kept locally for 30 days, then permanently erased. You can also empty the trash manually anytime.",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             if (trash.isNotEmpty()) {
-                Row(modifier = Modifier.padding(16.dp)) {
-                    OutlinedButton(onClick = { vm.emptyTrash() }) { Text("Empty Trash") }
+                Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                    OutlinedButton(
+                        onClick = { vm.emptyTrash() },
+                        shape = RoundedCornerShape(12.dp)
+                    ) { Text("Empty Trash Now") }
                 }
             }
         }
         items(trash) { entry: TrashEntry ->
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(entry.record.title, fontWeight = FontWeight.Bold)
-                    Text("Deleted ${formatMillis(entry.deletedAt)}", fontSize = 12.sp)
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(entry.record.title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text("Deleted ${formatMillis(entry.deletedAt)}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    TextButton(onClick = { vm.restoreFromTrash(entry) }) { Text("Restore") }
+                    TextButton(onClick = { vm.deleteForever(entry) }) { Text("Delete") }
                 }
-                TextButton(onClick = { vm.restoreFromTrash(entry) }) { Text("Restore") }
-                TextButton(onClick = { vm.deleteForever(entry) }) { Text("Delete forever") }
             }
         }
         if (trash.isEmpty()) {
-            item { Text("Trash is empty.", modifier = Modifier.padding(16.dp)) }
+            item {
+                Text("Trash is empty.", modifier = Modifier.padding(24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
         item { DonateFooter(isMoreScreen = false, onDonate = { donate(context) }) }
     }
@@ -447,25 +831,44 @@ fun MoreScreen(vm: VaultViewModel, donate: (Context) -> Unit, context: Context) 
     val vault by vm.vault.collectAsState()
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
-            Text("More", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(16.dp))
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Security & About", fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                Text("Offline personal vault architecture", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("About DocuBuds", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version 1.0.0 · Android only")
-                    Text("Signed in as: ${vault?.displayName ?: ""} (display name only, not an account)")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Fully offline. No account, no cloud, no backup, no recovery key. Free, with no ads. Your vault is unlocked only by your phone's lock, and locks again after 1 minute of inactivity.")
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.Filled.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text("DocuBuds v1.0.1", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+                    Text("Vault Name: ${vault?.displayName ?: ""}")
+                    Text(
+                        "Strict Offline Contract: No user accounts, zero remote servers, no telemetry, no analytics. All encryption keys are derived on-device with Android Keystore and SQLCipher.",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 18.sp
+                    )
                 }
             }
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Your private records", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text("No backup exists. Losing this phone, uninstalling, or clearing app data erases your records permanently. Deleted items can be recovered from Trash for 30 days only.")
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Zero Backup Guarantee", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(
+                        "By design, there is no remote backup or master password. If this device is lost or the app uninstalled, data cannot be recovered. Auto-locks after 60 seconds of inactivity.",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 18.sp
+                    )
                 }
             }
         }
@@ -479,33 +882,38 @@ fun RecordDetailDialog(vm: VaultViewModel, record: VaultRecord, donate: (Context
     var confirmDelete by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(record.title) },
+        title = { Text(record.title, fontWeight = FontWeight.Bold) },
         text = {
-            Column {
-                Text("Type: ${record.type.name.lowercase().replace('_', ' ')}", fontSize = 13.sp)
-                record.spaceId.let { Text("Location: ${vm.spacePath(it)}", fontSize = 13.sp) }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("Type: ${record.type.name.lowercase().replace('_', ' ')}", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                record.spaceId.let { Text("Space: ${vm.spacePath(it)}", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 if (record.expiryEpochDay != null) {
-                    Text("Expires: ${formatEpochDay(record.expiryEpochDay)}", fontSize = 13.sp)
+                    Text("Expiry: ${formatEpochDay(record.expiryEpochDay)}", fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 record.fields.forEach { (key, value) ->
                     MaskedFieldRow(key, value)
                 }
                 record.fileName?.let {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("File: $it", fontSize = 13.sp)
-                    OutlinedButton(onClick = { showFile = true }) { Text("View file") }
+                    Text("Encrypted File: $it", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+                    OutlinedButton(
+                        onClick = { showFile = true },
+                        shape = RoundedCornerShape(10.dp)
+                    ) { Text("View Decrypted File") }
                 }
             }
         },
         confirmButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(onClick = { vm.shareRecord(context, record) }) {
-                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Share")
                 }
-                TextButton(onClick = { confirmDelete = true }) { Text("Delete") }
+                TextButton(onClick = { confirmDelete = true }) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
             }
         },
         dismissButton = {
@@ -515,10 +923,13 @@ fun RecordDetailDialog(vm: VaultViewModel, record: VaultRecord, donate: (Context
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Delete this record?") },
-            text = { Text("It will move to Trash for 30 days, then be gone for good.") },
+            title = { Text("Move to Trash?") },
+            text = { Text("This record will remain in your trash for 30 days before being permanently removed.") },
             confirmButton = {
-                Button(onClick = { vm.deleteRecord(record); confirmDelete = false; onDismiss() }) { Text("Move to Trash") }
+                Button(
+                    onClick = { vm.deleteRecord(record); confirmDelete = false; onDismiss() },
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) { Text("Move to Trash") }
             },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } }
         )
@@ -536,17 +947,19 @@ fun MaskedFieldRow(key: String, value: String) {
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("$key: ", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Text("$key: ", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
         Text(
             text = if (sensitive && !revealed) "••••••••" else value,
-            fontSize = 14.sp,
+            fontSize = 13.sp,
+            fontFamily = if (sensitive) androidx.compose.ui.text.font.FontFamily.Monospace else androidx.compose.ui.text.font.FontFamily.Default,
             modifier = Modifier.weight(1f)
         )
         if (sensitive) {
             IconButton(onClick = { revealed = !revealed }) {
                 Icon(
                     if (revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                    contentDescription = if (revealed) "Hide" else "Reveal"
+                    contentDescription = if (revealed) "Hide" else "Reveal",
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -565,7 +978,8 @@ fun TextInputDialog(title: String, label: String, onDismiss: () -> Unit, onConfi
                 onValueChange = { text = it },
                 label = { Text(label) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             )
         },
         confirmButton = {
@@ -574,20 +988,5 @@ fun TextInputDialog(title: String, label: String, onDismiss: () -> Unit, onConfi
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
-    )
-}
-
-@Composable
-fun AddMenuDialog(onAddRecord: () -> Unit, onAddDocument: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Add") },
-        text = {
-            Column {
-                TextButton(onClick = onAddRecord) { Text("Add a record (ID, bank, card, login, note)") }
-                TextButton(onClick = onAddDocument) { Text("Add a document (scan, gallery, file)") }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } }
     )
 }

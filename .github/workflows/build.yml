@@ -74,18 +74,18 @@ jobs:
           path: apk
 
       - name: Rename APK
-        run: cp apk/app-release.apk docubuds-v1.0.0.apk
+        run: cp apk/app-release.apk docubuds-v1.0.1.apk
 
       - name: Create GitHub Release with the APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          files: docubuds-v1.0.0.apk
-          name: DocuBuds v1.0.0
+          tag_name: v1.0.1
+          files: docubuds-v1.0.1.apk
+          name: DocuBuds v1.0.1
           body: |
-            DocuBuds v1.0.0 — final release build of the complete Android vault app.
-            Free, fully offline, no ads. See README.md for what was tested.
-            Install the APK directly on your Android phone (allow installing from this source when asked).
-            If you installed the earlier debug build, uninstall it first — the release build is signed with a different key.
+            DocuBuds v1.0.1 — final production release build.
+            - New Vault App Icon representing offline stored documents
+            - True empty state on first launch (zero pre-seeded spaces/folders)
+            - Full Material 3 mobile UI redesign with sliding bottom sheet, expiry alerts, and credential masking
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
